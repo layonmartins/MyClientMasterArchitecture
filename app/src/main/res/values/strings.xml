@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">MyClientMasterArchitecture</string>
+    <string name="error_network_call_failed">Network call failed</string>
+</resources>
