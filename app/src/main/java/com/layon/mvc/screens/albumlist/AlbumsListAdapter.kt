@@ -1,6 +1,7 @@
 package com.layon.mvc.screens.albumlist
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,8 +15,10 @@ import com.layon.mvc.albums.Album
 class AlbumsListAdapter(context: Context, var onAlbumClickListener: OnAlbumClickListener) :
     ArrayAdapter<Album>(context, 0) {
 
+    private val TAG = "layon.f - AlbumsListAdapter"
+
     interface OnAlbumClickListener {
-        fun onAlbumClicked(album: Album?)
+        fun onAlbumClicked(album: Album)
     }
 
     @NonNull
@@ -36,11 +39,17 @@ class AlbumsListAdapter(context: Context, var onAlbumClickListener: OnAlbumClick
         txtTitle.text = album?.title
 
         // set listener
-        convertView.setOnClickListener { onAlbumClicked(album) }
+        convertView.setOnClickListener {
+            if (album != null) {
+                onAlbumClicked(album)
+            }
+        }
+        Log.d(TAG, "getView: $convertView")
         return convertView
     }
 
-    private fun onAlbumClicked(album: Album?) {
+    private fun onAlbumClicked(album: Album) {
+        Log.d(TAG, "onAlbumClicked: $album")
         onAlbumClickListener.onAlbumClicked(album)
     }
 }

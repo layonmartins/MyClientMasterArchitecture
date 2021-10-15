@@ -2,6 +2,7 @@ package com.layon.mvc.screens.albumlist
 
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.widget.ListView
 import android.widget.Toast
 import com.layon.mvc.R
@@ -18,20 +19,28 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class AlbumsListActivity : BaseActivity(), AlbumsListAdapter.OnAlbumClickListener {
+class AlbumsListActivity : BaseActivity(), AlbumListViewMvc.Listener {
 
-    private lateinit var jsonPlaceHolderApi: JsonPlaceHolderApi
-    private lateinit var listAlbum: ListView
-    private lateinit var albumsListAdapter: AlbumsListAdapter
     private val TAG = "layon.f - AlbumsListActivity"
+    private lateinit var jsonPlaceHolderApi: JsonPlaceHolderApi
+    private lateinit var mViewMvc: AlbumListViewMvc
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.layout_albums_list)
 
-        listAlbum = findViewById(R.id.lst_albums)
-        albumsListAdapter = AlbumsListAdapter(this, this)
-        listAlbum.adapter = albumsListAdapter
+        mViewMvc = AlbumListViewMvcImpl(LayoutInflater.from(this), null)
+        mViewMvc.registerListener(this)
+
+        setUpRetrofit()
+        setContentView(mViewMvc.getRootView())
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mViewMvc.unregisterListener(this)
+    }
+
+    private fun setUpRetrofit(){
         jsonPlaceHolderApi = Retrofit.Builder()
             .baseUrl(Constants.BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
@@ -89,16 +98,14 @@ class AlbumsListActivity : BaseActivity(), AlbumsListAdapter.OnAlbumClickListene
             albumList.add(Album(it.userId, it.id, it.title))
         }
 
-        albumsListAdapter.clear()
-        albumsListAdapter.addAll(albumList)
-        albumsListAdapter.notifyDataSetChanged()
+        mViewMvc.bindAlbums(albumList)
     }
 
     private fun networkCallFailed() {
         Toast.makeText(this, R.string.error_network_call_failed, Toast.LENGTH_SHORT).show()
     }
 
-    override fun onAlbumClicked(album: Album?) {
+    override fun onAlbumClicked(album: Album) {
         Toast.makeText(this, album?.title, Toast.LENGTH_SHORT).show()
     }
 
