@@ -13,7 +13,7 @@ import com.layon.mvc.R
 import com.layon.mvc.albums.Album
 
 class AlbumsListAdapter(context: Context, var onAlbumClickListener: OnAlbumClickListener) :
-    ArrayAdapter<Album>(context, 0) {
+    ArrayAdapter<Album>(context, 0), AlbumListViewMvc.Listener {
 
     private val TAG = "layon.f - AlbumsListAdapter"
 
@@ -29,37 +29,21 @@ class AlbumsListAdapter(context: Context, var onAlbumClickListener: OnAlbumClick
     ): View {
         var convertView = convertView
         if (convertView == null) {
-            Log.d(TAG, "convertView == null")
-            convertView = LayoutInflater.from(parent.context)
-                .inflate(R.layout.layout_albums_list_item, parent, false)
-            var viewHolder = ViewHolder()
-            viewHolder.mTxtTitle = convertView.findViewById(R.id.txt_title)
-            convertView.tag = viewHolder
+            var viewMvc = AlbumListItemViewMvcImpl(LayoutInflater.from(context), parent)
+            viewMvc.registerListener(this)
+            convertView = viewMvc.getRootView()
+            convertView.tag = viewMvc
         }
+
         val album: Album? = getItem(position)
+        var viewMvc = convertView?.tag as AlbumListItemViewMvc
+        viewMvc.bindAlbum(album!!)
 
-        // bind the data to views
-        val viewHolder = convertView?.tag as ViewHolder
-        viewHolder.mTxtTitle.text = album?.title
-
-        // set listener
-        convertView.setOnClickListener {
-            if (album != null) {
-                onAlbumClicked(album)
-            }
-        }
-        Log.d(TAG, "getView: $convertView")
         return convertView
     }
 
-    private fun onAlbumClicked(album: Album) {
+    override fun onAlbumClicked(album: Album) {
         Log.d(TAG, "onAlbumClicked: $album")
         onAlbumClickListener.onAlbumClicked(album)
-    }
-
-    companion object {
-        private class ViewHolder {
-            lateinit var mTxtTitle : TextView
-        }
     }
 }
