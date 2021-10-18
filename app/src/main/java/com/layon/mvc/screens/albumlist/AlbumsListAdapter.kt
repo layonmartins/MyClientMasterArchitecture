@@ -29,14 +29,18 @@ class AlbumsListAdapter(context: Context, var onAlbumClickListener: OnAlbumClick
     ): View {
         var convertView = convertView
         if (convertView == null) {
+            Log.d(TAG, "convertView == null")
             convertView = LayoutInflater.from(parent.context)
                 .inflate(R.layout.layout_albums_list_item, parent, false)
+            var viewHolder = ViewHolder()
+            viewHolder.mTxtTitle = convertView.findViewById(R.id.txt_title)
+            convertView.tag = viewHolder
         }
         val album: Album? = getItem(position)
 
         // bind the data to views
-        val txtTitle = convertView!!.findViewById<TextView>(R.id.txt_title)
-        txtTitle.text = album?.title
+        val viewHolder = convertView?.tag as ViewHolder
+        viewHolder.mTxtTitle.text = album?.title
 
         // set listener
         convertView.setOnClickListener {
@@ -51,5 +55,11 @@ class AlbumsListAdapter(context: Context, var onAlbumClickListener: OnAlbumClick
     private fun onAlbumClicked(album: Album) {
         Log.d(TAG, "onAlbumClicked: $album")
         onAlbumClickListener.onAlbumClicked(album)
+    }
+
+    companion object {
+        private class ViewHolder {
+            lateinit var mTxtTitle : TextView
+        }
     }
 }
